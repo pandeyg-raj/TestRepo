@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Add React in One Minute</title>
+  </head>
+  <body>
+
+    <!-- We will put our React component inside this div. -->
+    <div id="place-app"> </div>
+
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+ 
+    <!-- Load our React component. -->
+    <script type="text/babel" >
+
+    class Day extends React.Component{
+        
+      render(){
+        return(
+        <div>
+          <table>
+                <tbody><tr>
+                  <td style={{padding:"0 15px 0 15px"}} > {this.props.name} In </td>
+                  <td style={{padding:"0 15px 0 15px"}} ><input type="time"  id={this.props.name + "In"} name="appt"/></td>
+                  <td style={{padding:"0 15px 0 15px"}} > Out </td>              
+                  <td style={{padding:"0 15px 0 15px"}} ><input  onChange={this.props.updateResponse} id={this.props.name + "Out"} type="time" name={this.props.name} /></td>
+                  <td style={{padding:"0 15px 0 15px"}} > Total </td>
+                  <td style={{padding:"0 15px 0 15px"}} >{this.props.currentDayTime}</td>
+                </tr></tbody> 
+          </table>
+        </div>
+        );
+      }  
+    }
+
+      class Week extends React.Component {
+        constructor(props) {
+        super(props);
+        this.state = { 
+          mon: "00:00",monH:0.0,
+          wed: "00:00",wedH:0.0,
+          thu: "00:00",thuH:0.0,
+          fri: "00:00",friH:0.0,
+          rem: "30:00",remH: 30.0
+        };
+      }
+       calculateTotalTimeDiffHours(){
+        var monHours = this.state.monH;
+        var wedHours = this.state.wedH;
+        var thuHours = this.state.thuH;
+        var friHours = this.state.friH;
+        var Total = monHours + wedHours + thuHours + friHours;
+        return Total;
+
+       }
+       
+        updateTotalRemainingTime(){
+          var TotalHours = this.calculateTotalTimeDiffHours()
+          var TotalRemaining = 40.0 - TotalHours;
+          this.setState({ remH : TotalRemaining })
+          var hours = Math.floor(TotalRemaining);
+          var mins = Math.floor((TotalRemaining - hours)*60);
+          var timeHuman = hours+":"+mins
+          this.setState({ rem : timeHuman })
+        }
+        updateResponse = (event) => {
+          var start  = document.getElementById(event.currentTarget.name+'In').value
+          var end  = document.getElementById(event.currentTarget.name+'Out').value
+          start = start.split(":");
+          end = end.split(":");
+          var startDate = new Date(0, 0, 0, start[0], start[1], 0);
+          var endDate = new Date(0, 0, 0, end[0], end[1], 0);
+          var diff = endDate.getTime() - startDate.getTime();
+          var hours2 = (diff / 1000 / 60 / 60);
+          var hours = Math.floor(diff / 1000 / 60 / 60);
+          diff -= hours * 1000 * 60 * 60;
+          var minutes = Math.floor(diff / 1000 / 60);
+          var Final = ((hours < 9 ? "0" : "") + hours + ":" + (minutes < 9 ? "0" : "") + minutes);
+          var tmpH = event.currentTarget.name + "H"
+          this.setState({ [event.currentTarget.name] : Final ,
+                          [tmpH] : hours2 },
+                          this.updateTotalRemainingTime )
+          
+          // update Total remain time
+          
+      }
+      render() {
+        return (
+          <div>
+          <Day name="mon" currentDayTime={this.state.mon} getDayTime={this.getDayTime} updateResponse={this.updateResponse} />  
+          <Day name="wed" currentDayTime={this.state.wed} getDayTime={this.getDayTime} updateResponse={this.updateResponse} />  
+          <Day name="thu" currentDayTime={this.state.thu} getDayTime={this.getDayTime} updateResponse={this.updateResponse} />  
+          <Day name="fri" currentDayTime={this.state.fri} getDayTime={this.getDayTime} updateResponse={this.updateResponse} />  
+          <h1> Remaining time is {this.state.rem}</h1>
+          </div>
+        );
+      }
+}
+ReactDOM.render(<Week/>, document.getElementById('place-app'));
+</script>
+
+  </body>
+</html>
